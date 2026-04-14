@@ -3,45 +3,63 @@ package com.example.childspace
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.example.childspace.data.local.TokenManager
+import com.example.childspace.data.repository.AuthRepository
+import com.example.childspace.data.repository.ScheduleRepository
+import com.example.childspace.network.AuthApiService
+import com.example.childspace.network.RetrofitClient
+import com.example.childspace.network.ScheduleApiService
+import com.example.childspace.ui.auth.AuthViewModel
+import com.example.childspace.ui.auth.LoginScreen
+import com.example.childspace.ui.schedule.ScheduleScreen
+import com.example.childspace.ui.schedule.ScheduleViewModel
 import com.example.childspace.ui.theme.ChildspaceTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+
+        val tokenManager = TokenManager(applicationContext)
+
+        val retrofit = RetrofitClient.create(tokenManager)
+
+        val authApi = retrofit.create(AuthApiService::class.java)
+        val scheduleApi = retrofit.create(ScheduleApiService::class.java)
+
+        val authRepository = AuthRepository(authApi, tokenManager)
+        val authViewModel = AuthViewModel(authRepository)
+
+        val userRole = tokenManager.getRole()
+        val isTeacher = userRole == "Teacher"
+
+        val scheduleRepository = ScheduleRepository(scheduleApi)
+        val scheduleViewModel = ScheduleViewModel(scheduleRepository, isTeacher)
+
         setContent {
             ChildspaceTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
+                var isLoggedIn by remember { mutableStateOf(tokenManager.getToken() != null) }
+
+                if (isLoggedIn) {
+                    ScheduleScreen(
+                        viewModel = scheduleViewModel,
+                        onLogoutClick = {
+                            authRepository.logout()
+                            isLoggedIn = false
+                        }
+                    )
+                } else {
+                    LoginScreen(
+                        viewModel = authViewModel,
+                        onNavigateToMain = {
+                            isLoggedIn = true
+                        }
                     )
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    ChildspaceTheme {
-        Greeting("Android")
     }
 }
