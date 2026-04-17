@@ -15,7 +15,7 @@ import com.example.childspace.network.RetrofitClient
 import com.example.childspace.network.ScheduleApiService
 import com.example.childspace.ui.auth.AuthViewModel
 import com.example.childspace.ui.auth.LoginScreen
-import com.example.childspace.ui.schedule.ScheduleScreen
+import com.example.childspace.ui.main.MainScreen
 import com.example.childspace.ui.schedule.ScheduleViewModel
 import com.example.childspace.ui.theme.ChildspaceTheme
 
@@ -44,8 +44,8 @@ class MainActivity : ComponentActivity() {
                 var isLoggedIn by remember { mutableStateOf(tokenManager.getToken() != null) }
 
                 if (isLoggedIn) {
-                    ScheduleScreen(
-                        viewModel = scheduleViewModel,
+                    MainScreen(
+                        scheduleViewModel = scheduleViewModel,
                         onLogoutClick = {
                             authRepository.logout()
                             isLoggedIn = false
