@@ -19,6 +19,10 @@ import com.example.childspace.ui.main.MainScreen
 import com.example.childspace.ui.schedule.ScheduleViewModel
 import com.example.childspace.ui.theme.ChildspaceTheme
 
+import com.example.childspace.network.ProfileApiService
+import com.example.childspace.data.repository.ProfileRepository
+import com.example.childspace.ui.profile.ProfileViewModel
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,6 +34,8 @@ class MainActivity : ComponentActivity() {
         val authApi = retrofit.create(AuthApiService::class.java)
         val scheduleApi = retrofit.create(ScheduleApiService::class.java)
 
+        val profileApi = retrofit.create(ProfileApiService::class.java)
+
         val authRepository = AuthRepository(authApi, tokenManager)
         val authViewModel = AuthViewModel(authRepository)
 
@@ -39,6 +45,9 @@ class MainActivity : ComponentActivity() {
         val scheduleRepository = ScheduleRepository(scheduleApi)
         val scheduleViewModel = ScheduleViewModel(scheduleRepository, isTeacher)
 
+        val profileRepository = ProfileRepository(profileApi)
+        val profileViewModel = ProfileViewModel(profileRepository)
+
         setContent {
             ChildspaceTheme {
                 var isLoggedIn by remember { mutableStateOf(tokenManager.getToken() != null) }
@@ -46,6 +55,7 @@ class MainActivity : ComponentActivity() {
                 if (isLoggedIn) {
                     MainScreen(
                         scheduleViewModel = scheduleViewModel,
+                        profileViewModel = profileViewModel,
                         onLogoutClick = {
                             authRepository.logout()
                             isLoggedIn = false

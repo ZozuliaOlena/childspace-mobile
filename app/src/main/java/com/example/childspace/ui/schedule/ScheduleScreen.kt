@@ -26,7 +26,7 @@ val LightPurpleBg = Color(0xFFEDE4F5)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScheduleScreen(viewModel: ScheduleViewModel, onLogoutClick: () -> Unit) {
+fun ScheduleScreen(viewModel: ScheduleViewModel) {
     LaunchedEffect(Unit) {
         viewModel.loadSchedule()
     }
@@ -37,12 +37,7 @@ fun ScheduleScreen(viewModel: ScheduleViewModel, onLogoutClick: () -> Unit) {
                 title = {
                     Text("Розклад", color = DarkPurple, fontWeight = FontWeight.Bold)
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = LightPurpleBg),
-                actions = {
-                    TextButton(onClick = onLogoutClick) {
-                        Text("Вийти", color = AccentPurple, fontWeight = FontWeight.Bold)
-                    }
-                }
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = LightPurpleBg)
             )
         },
         containerColor = LightPurpleBg

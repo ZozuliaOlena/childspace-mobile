@@ -11,12 +11,13 @@ import com.example.childspace.ui.navigation.BottomNavigationBar
 import com.example.childspace.ui.navigation.BottomNavItem
 import com.example.childspace.ui.schedule.ScheduleScreen
 import com.example.childspace.ui.schedule.ScheduleViewModel
-
-// import com.example.childspace.ui.chats.ChatsScreen -- екран чатів
+import com.example.childspace.ui.profile.ProfileScreen
+import com.example.childspace.ui.profile.ProfileViewModel
 
 @Composable
 fun MainScreen(
     scheduleViewModel: ScheduleViewModel,
+    profileViewModel: ProfileViewModel,
     onLogoutClick: () -> Unit
 ) {
     val navController = rememberNavController()
@@ -35,14 +36,19 @@ fun MainScreen(
 
             composable(BottomNavItem.Schedule.route) {
                 ScheduleScreen(
-                    viewModel = scheduleViewModel,
-                    onLogoutClick = onLogoutClick
+                    viewModel = scheduleViewModel
                 )
             }
 
-            // Додати екран чатів
             composable(BottomNavItem.Chats.route) {
+                // Додати чати
+            }
 
+            composable(BottomNavItem.Profile.route) {
+                ProfileScreen(
+                    viewModel = profileViewModel,
+                    onLogoutClick = onLogoutClick
+                )
             }
         }
     }

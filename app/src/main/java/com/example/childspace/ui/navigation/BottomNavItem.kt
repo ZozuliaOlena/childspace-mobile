@@ -3,6 +3,7 @@ package com.example.childspace.ui.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.MailOutline
+import androidx.compose.material.icons.filled.Person // ДОБАВЛЕНО: иконка профиля
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -15,6 +16,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 sealed class BottomNavItem(val route: String, val title: String, val icon: ImageVector) {
     object Schedule : BottomNavItem("schedule", "Розклад", Icons.Filled.DateRange)
     object Chats : BottomNavItem("chats", "Чати", Icons.Filled.MailOutline)
+    object Profile : BottomNavItem("profile", "Профіль", Icons.Filled.Person)
 }
 
 val DarkPurple = Color(0xFF4F169E)
@@ -25,7 +27,8 @@ val LightPurpleBg = Color(0xFFEDE4F5)
 fun BottomNavigationBar(navController: NavController) {
     val items = listOf(
         BottomNavItem.Schedule,
-        BottomNavItem.Chats
+        BottomNavItem.Chats,
+        BottomNavItem.Profile
     )
 
     NavigationBar(
