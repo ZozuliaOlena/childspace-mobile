@@ -2,6 +2,10 @@ package com.example.childspace.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
+val DarkPurple = Color(0xFF4F169E)
+val AccentPurple = Color(0xFF7620D0)
+val LightPurpleBg = Color(0xFFEDE4F5)
+
 val Purple80 = Color(0xFFD0BCFF)
 val PurpleGrey80 = Color(0xFFCCC2DC)
 val Pink80 = Color(0xFFEFB8C8)
