@@ -29,6 +29,10 @@ class ChatRepository(private val apiService: ChatApiService,
         signalRManager.connect()
     }
 
+    fun joinChatGroup(chatId: String) {
+        signalRManager.joinChatGroup(chatId)
+    }
+
     fun disconnectFromLiveChat() {
         signalRManager.disconnect()
     }

@@ -45,6 +45,17 @@ class SignalRManager(private val tokenManager: TokenManager ) {
         }
     }
 
+    fun joinChatGroup(chatId: String) {
+        try {
+            if (hubConnection?.connectionState == HubConnectionState.CONNECTED) {
+                hubConnection?.invoke("JoinChat", chatId)
+                Log.d("SignalR", "Успішно зайшли в групу чату: $chatId")
+            }
+        } catch (e: Exception) {
+            Log.e("SignalR", "Помилка входу в групу: ${e.message}")
+        }
+    }
+
     fun disconnect() {
         if (hubConnection?.connectionState == HubConnectionState.CONNECTED){
             hubConnection?.stop()

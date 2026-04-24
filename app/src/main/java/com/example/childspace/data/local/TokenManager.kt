@@ -18,10 +18,11 @@ class TokenManager(context: Context) {
     )
 
     // Теперь сохраняем и токен, и роль одним махом
-    fun saveAuthData(token: String, role: String) {
+    fun saveAuthData(token: String, role: String, userId: String) {
         prefs.edit()
             .putString("jwt_token", token)
             .putString("user_role", role)
+            .putString("user_id", userId)
             .apply()
     }
 
@@ -30,11 +31,14 @@ class TokenManager(context: Context) {
     // Метод для получения роли
     fun getRole(): String? = prefs.getString("user_role", null)
 
+    fun getUserId(): String = prefs.getString("user_id", "") ?: ""
+
     // При выходе удаляем все данные
     fun clearAuthData() {
         prefs.edit()
             .remove("jwt_token")
             .remove("user_role")
+            .remove("user_id")
             .apply()
     }
 }

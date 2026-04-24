@@ -25,10 +25,25 @@ class ChatDetailsViewModel (private val repository: ChatRepository) : ViewModel(
     private val _editingMessage = MutableStateFlow<ChatMessageResponseDto?>(null)
     val editingMessage: StateFlow<ChatMessageResponseDto?> = _editingMessage.asStateFlow()
 
+    init {
+        viewModelScope.launch {
+            repository.incomingMessages.collect { newMessage ->
+                val currentList = _messages.value
+                if (currentList.none { it.id == newMessage.id }) {
+                    _messages.value = listOf(newMessage) + currentList
+                }
+            }
+        }
+    }
+
     fun openChat(chatId: String) {
         activeChatId = chatId
         _messages.value = emptyList()
         repository.connectToLiveChat()
+        viewModelScope.launch {
+            kotlinx.coroutines.delay(500)
+            repository.joinChatGroup(chatId)
+        }
         loadMessages()
     }
 
@@ -40,7 +55,8 @@ class ChatDetailsViewModel (private val repository: ChatRepository) : ViewModel(
                 // Пагінацію додати
                 val response = repository.getChatMessages(activeChatId!!, 1, 50)
                 if (response.isSuccessful) {
-                    _messages.value = response.body() ?: emptyList()
+                    val list = response.body() ?: emptyList()
+                    _messages.value = list.sortedByDescending { it.createdAt }
                 }
             } catch (e: Exception) {
                 Log.e("ChatDetailVM", "Помилка: ${e.message}")

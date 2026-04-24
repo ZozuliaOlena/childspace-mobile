@@ -9,6 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.example.childspace.data.local.TokenManager
 import com.example.childspace.data.repository.AuthRepository
+import com.example.childspace.data.repository.ChatRepository
 import com.example.childspace.data.repository.ScheduleRepository
 import com.example.childspace.network.AuthApiService
 import com.example.childspace.network.RetrofitClient
@@ -21,6 +22,10 @@ import com.example.childspace.ui.theme.ChildspaceTheme
 
 import com.example.childspace.network.ProfileApiService
 import com.example.childspace.data.repository.ProfileRepository
+import com.example.childspace.network.ChatApiService
+import com.example.childspace.network.SignalRManager
+import com.example.childspace.ui.chat.ChatDetailsViewModel
+import com.example.childspace.ui.chat.ChatsViewModel
 import com.example.childspace.ui.profile.ProfileViewModel
 
 class MainActivity : ComponentActivity() {
@@ -36,6 +41,8 @@ class MainActivity : ComponentActivity() {
 
         val profileApi = retrofit.create(ProfileApiService::class.java)
 
+        val chatApi = retrofit.create(ChatApiService::class.java)
+
         val authRepository = AuthRepository(authApi, tokenManager)
         val authViewModel = AuthViewModel(authRepository)
 
@@ -48,6 +55,11 @@ class MainActivity : ComponentActivity() {
         val profileRepository = ProfileRepository(profileApi)
         val profileViewModel = ProfileViewModel(profileRepository)
 
+        val signalRManager = SignalRManager(tokenManager)
+        val chatRepository = ChatRepository(chatApi, signalRManager)
+        val chatsViewModel = ChatsViewModel(chatRepository)
+        val chatDetailsViewModel = ChatDetailsViewModel(chatRepository)
+
         setContent {
             ChildspaceTheme {
                 var isLoggedIn by remember { mutableStateOf(tokenManager.getToken() != null) }
@@ -56,6 +68,9 @@ class MainActivity : ComponentActivity() {
                     MainScreen(
                         scheduleViewModel = scheduleViewModel,
                         profileViewModel = profileViewModel,
+                        chatsViewModel = chatsViewModel,
+                        chatDetailsViewModel = chatDetailsViewModel,
+                        currentUserId = tokenManager.getUserId(),
                         onLogoutClick = {
                             authRepository.logout()
                             isLoggedIn = false

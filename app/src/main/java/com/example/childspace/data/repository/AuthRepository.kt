@@ -19,7 +19,7 @@ class AuthRepository(
                 val primaryRole = body.roles.firstOrNull() ?: "Parent"
 
                 // Сохраняем токен и роль!
-                tokenManager.saveAuthData(body.token, primaryRole)
+                tokenManager.saveAuthData(body.token, primaryRole, body.id)
 
                 Result.success(Unit)
             } else {
