@@ -3,7 +3,9 @@ package com.example.childspace.ui.chat
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.childspace.data.model.ChatMessageResponseDto
+import com.example.childspace.data.model.UserDto
 import com.example.childspace.data.repository.ChatRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,11 +18,11 @@ class ChatDetailsViewModel (private val repository: ChatRepository) : ViewModel(
     private val _messages = MutableStateFlow<List<ChatMessageResponseDto>>(emptyList())
     val messages: StateFlow<List<ChatMessageResponseDto>> = _messages.asStateFlow()
 
-    private val _inputText = MutableStateFlow("")
-    val inputText: StateFlow<String> = _inputText.asStateFlow()
-
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _participants = MutableStateFlow<List<UserDto>>(emptyList())
+    val participants: StateFlow<List<UserDto>> = _participants.asStateFlow()
 
     private val _editingMessage = MutableStateFlow<ChatMessageResponseDto?>(null)
     val editingMessage: StateFlow<ChatMessageResponseDto?> = _editingMessage.asStateFlow()
@@ -66,15 +68,44 @@ class ChatDetailsViewModel (private val repository: ChatRepository) : ViewModel(
         }
     }
 
+    fun loadParticipants() {
+        val chatId = activeChatId ?: return
+        viewModelScope.launch{
+            try{
+                val response = repository.getChatParticipants(chatId)
+                if (response.isSuccessful) {
+                    _participants.value = response.body() ?: emptyList()
+                } else {
+                    Log.e("ChatDetailVM", "Помилка завантаження учасників: ${response.code()}")
+                }
+            } catch (e: Exception){
+                Log.e("ChatDetailVM", "Exception: ${e.message}")
+            }
+        }
+    }
+
     fun sendMessage(content: String) {
         val chatId = activeChatId ?: return
         viewModelScope.launch {
             try {
                 if (_editingMessage.value != null) {
-                    // Логіка оновлення
-                    // repository.updateMessage(_editingMessage.value!!.id, content)
-                    _editingMessage.value = null
-                    loadMessages() // Тимчасово
+                    val messageId = _editingMessage.value!!.id
+                    val response = repository.updateMessage(messageId, content)
+
+                    if (response.isSuccessful){
+                        _editingMessage.value = null
+                        val updatedList = _messages.value.map { message ->
+                            if (message.id == messageId) {
+                                message.copy(content = content)
+                            } else {
+                                message
+                            }
+                        }
+                        _messages.value = updatedList
+                    } else{
+                        Log.e("ChatDetailVM", "Помилка оновлення повідомлення: ${response.code()}")
+                    }
+
                 } else {
                     repository.sendMessage(chatId, content)
                 }
@@ -87,10 +118,14 @@ class ChatDetailsViewModel (private val repository: ChatRepository) : ViewModel(
     fun deleteMessage(messageId: String) {
         viewModelScope.launch {
             try {
-                // repository.deleteMessage(messageId)
-                _messages.value = _messages.value.filter { it.id != messageId }
+                val response = repository.deleteMessage(messageId)
+                if(response.isSuccessful){
+                    _messages.value = _messages.value.filter { it.id != messageId }
+                } else{
+                    Log.e("ChatDetailVM", "Помилка видалення повідомлення: ${response.code()}")
+                }
             } catch (e: Exception) {
-                Log.e("ChatDetailVM", "Помилка видалення: ${e.message}")
+                Log.e("ChatDetailVM", "Помилка під час видалення: ${e.message}")
             }
         }
     }

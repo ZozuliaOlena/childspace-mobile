@@ -3,6 +3,7 @@ package com.example.childspace.ui.chat
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -48,6 +51,9 @@ import com.example.childspace.ui.theme.AccentPurple
 import com.example.childspace.ui.theme.DarkPurple
 import java.text.SimpleDateFormat
 import java.util.Locale
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,6 +70,7 @@ fun ChatDetailsScreen (
     var messageText by remember { mutableStateOf("") }
 
     var showParticipantsDialog by remember { mutableStateOf(false) }
+    val participantsList by viewModel.participants.collectAsState()
 
     LaunchedEffect(chatId) {
         viewModel.openChat(chatId)
@@ -144,18 +151,74 @@ fun ChatDetailsScreen (
         }
     }
     if (showParticipantsDialog) {
-        // Тут буде діалог з учасниками
-        /*AlertDialog(
+        LaunchedEffect(Unit) {
+            viewModel.loadParticipants()
+        }
+        AlertDialog(
             onDismissRequest = { showParticipantsDialog = false },
-            title = { Text("Учасники чату", color = DarkPurple, fontWeight = FontWeight.Bold) },
-            text = { Text("Тут буде список (Тетяна, Валентин тощо...)") },
-            confirmButton = {
-                TextButton(onClick = { showParticipantsDialog = false }) {
-                    val AccentPurple = null
-                    Text("Закрити", color = AccentPurple)
+            title = {
+                Text("Учасники чату", color = DarkPurple, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            },
+            text = {
+                if (participantsList.isEmpty()) {
+                    Text("Завантаження...", color = Color.Gray)
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(participantsList) { user ->
+                            val isMe = user.id.equals(currentUserId, ignoreCase = true)
+                            val fullName = "${user.firstName} ${user.lastName}"
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(Color.White, RoundedCornerShape(12.dp))
+                                    .border(1.dp, AccentPurple.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
+                                    .padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0xFFEDE4F5)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = user.firstName.take(1).uppercase(),
+                                        color = DarkPurple,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 16.sp
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.width(12.dp))
+
+                                Text(
+                                    text = if (isMe) "$fullName (Ви)" else fullName,
+                                    color = DarkPurple,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 15.sp
+                                )
+                            }
+                        }
+                    }
                 }
-            }
-        )*/
+            },
+            confirmButton = {
+                Button(
+                    onClick = { showParticipantsDialog = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEDE4F5)),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Закрити", color = DarkPurple, fontWeight = FontWeight.Bold)
+                }
+            },
+            containerColor = Color.White,
+            shape = RoundedCornerShape(24.dp)
+        )
     }
 }
 
@@ -321,7 +384,11 @@ fun formatTime(isoString: String): String {
         val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
         val formatter = SimpleDateFormat("HH:mm", Locale.getDefault())
         val date = parser.parse(isoString)
-        if (date != null) formatter.format(date) else ""
+        if (date != null){
+            formatter.format(date)
+        } else {
+            ""
+        }
     } catch (e: Exception) {
         ""
     }
@@ -332,7 +399,11 @@ fun formatDateForHeader(isoString: String): String {
         val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
         val formatter = SimpleDateFormat("dd MMMM yyyy 'р.'", Locale("uk", "UA"))
         val date = parser.parse(isoString)
-        if (date != null) formatter.format(date) else ""
+        if (date != null){
+            formatter.format(date)
+        } else {
+            ""
+        }
     } catch (e: Exception) {
         ""
     }
