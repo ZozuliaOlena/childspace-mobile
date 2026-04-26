@@ -1,9 +1,16 @@
 package com.example.childspace.ui.main
 
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -19,6 +26,9 @@ import com.example.childspace.ui.schedule.ScheduleScreen
 import com.example.childspace.ui.schedule.ScheduleViewModel
 import com.example.childspace.ui.profile.ProfileScreen
 import com.example.childspace.ui.profile.ProfileViewModel
+import android.Manifest
+import com.google.firebase.messaging.FirebaseMessaging
+import android.util.Log
 
 @Composable
 fun MainScreen(
@@ -30,6 +40,37 @@ fun MainScreen(
     onLogoutClick: () -> Unit
 ) {
     val navController = rememberNavController()
+    val context = LocalContext.current
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+        }
+    )
+
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val isPermissionGranted = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (!isPermissionGranted) {
+                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w("FCM_DEBUG", "Fetching FCM registration token failed", task.exception)
+                return@addOnCompleteListener
+            }
+            val token = task.result
+            Log.d("FCM_DEBUG", "Мій FCM Токен: $token")
+
+             profileViewModel.updateFcmToken(token)
+        }
+    }
 
     Scaffold(
         bottomBar = {

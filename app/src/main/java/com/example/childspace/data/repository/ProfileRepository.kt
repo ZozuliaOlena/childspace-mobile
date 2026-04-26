@@ -2,6 +2,7 @@ package com.example.childspace.data.repository
 
 import com.example.childspace.data.model.UserProfileDto
 import com.example.childspace.network.ProfileApiService
+import retrofit2.Response
 
 class ProfileRepository(private val apiService: ProfileApiService) {
 
@@ -16,5 +17,9 @@ class ProfileRepository(private val apiService: ProfileApiService) {
         } catch (e: Exception) {
             Result.failure(Exception("Перевірте підключення до інтернету"))
         }
+    }
+
+    suspend fun updateFcmToken(token: String): Response<Unit> {
+        return apiService.updateFcmToken(token)
     }
 }

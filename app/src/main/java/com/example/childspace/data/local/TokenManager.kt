@@ -23,7 +23,7 @@ class TokenManager(context: Context) {
             .putString("jwt_token", token)
             .putString("user_role", role)
             .putString("user_id", userId)
-            .apply()
+            .commit()
     }
 
     fun getToken(): String? = prefs.getString("jwt_token", null)

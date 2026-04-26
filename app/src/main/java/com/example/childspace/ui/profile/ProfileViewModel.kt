@@ -1,5 +1,6 @@
 package com.example.childspace.ui.profile
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.childspace.data.model.UserProfileDto
@@ -20,9 +21,9 @@ class ProfileViewModel(private val repository: ProfileRepository) : ViewModel() 
     private val _state = MutableStateFlow(ProfileState())
     val state: StateFlow<ProfileState> = _state.asStateFlow()
 
-    init {
-        loadProfileData()
-    }
+//    init {
+//        loadProfileData()
+//    }
 
     fun loadProfileData() {
         viewModelScope.launch {
@@ -40,6 +41,21 @@ class ProfileViewModel(private val repository: ProfileRepository) : ViewModel() 
                     isLoading = false,
                     errorMessage = error.message ?: "Невідома помилка"
                 )
+            }
+        }
+    }
+
+    fun updateFcmToken(fcmToken: String) {
+        viewModelScope.launch {
+            try {
+                val response = repository.updateFcmToken(fcmToken)
+                if (response.isSuccessful) {
+                    Log.d("FCM_DEBUG", "Токен успішно збережено в базі даних (через ViewModel)!")
+                } else {
+                    Log.e("FCM_DEBUG", "Помилка збереження токена: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Log.e("FCM_DEBUG", "Exception при відправці токена: ${e.message}")
             }
         }
     }
