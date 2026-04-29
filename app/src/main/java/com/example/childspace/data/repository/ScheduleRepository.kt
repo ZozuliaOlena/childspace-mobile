@@ -5,26 +5,13 @@ import com.example.childspace.network.ScheduleApiService
 
 class ScheduleRepository(private val apiService: ScheduleApiService) {
 
-    suspend fun getTeacherSchedule(): Result<List<ScheduleDto>> {
+    suspend fun getMySchedule(): Result<List<ScheduleDto>> {
         return try {
-            val response = apiService.getTeacherSchedule()
+            val response = apiService.getMySchedule()
             if (response.isSuccessful && response.body() != null) {
                 Result.success(response.body()!!)
             } else {
-                Result.failure(Exception("Помилка завантаження (Вчитель): ${response.code()}"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    suspend fun getChildrenSchedule(): Result<List<ScheduleDto>> {
-        return try {
-            val response = apiService.getChildrenSchedule()
-            if (response.isSuccessful && response.body() != null) {
-                Result.success(response.body()!!)
-            } else {
-                Result.failure(Exception("Помилка завантаження (Батьки): ${response.code()}"))
+                Result.failure(Exception("Помилка завантаження розкладу: ${response.code()}"))
             }
         } catch (e: Exception) {
             Result.failure(e)

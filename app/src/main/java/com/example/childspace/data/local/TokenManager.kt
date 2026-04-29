@@ -17,7 +17,6 @@ class TokenManager(context: Context) {
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
 
-    // Теперь сохраняем и токен, и роль одним махом
     fun saveAuthData(token: String, role: String, userId: String) {
         prefs.edit()
             .putString("jwt_token", token)
@@ -28,12 +27,10 @@ class TokenManager(context: Context) {
 
     fun getToken(): String? = prefs.getString("jwt_token", null)
 
-    // Метод для получения роли
     fun getRole(): String? = prefs.getString("user_role", null)
 
     fun getUserId(): String = prefs.getString("user_id", "") ?: ""
 
-    // При выходе удаляем все данные
     fun clearAuthData() {
         prefs.edit()
             .remove("jwt_token")

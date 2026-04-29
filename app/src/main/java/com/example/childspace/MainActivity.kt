@@ -46,11 +46,8 @@ class MainActivity : ComponentActivity() {
         val authRepository = AuthRepository(authApi, tokenManager)
         val authViewModel = AuthViewModel(authRepository)
 
-        val userRole = tokenManager.getRole()
-        val isTeacher = userRole == "Teacher"
-
         val scheduleRepository = ScheduleRepository(scheduleApi)
-        val scheduleViewModel = ScheduleViewModel(scheduleRepository, isTeacher)
+        val scheduleViewModel = ScheduleViewModel(scheduleRepository)
 
         val profileRepository = ProfileRepository(profileApi)
         val profileViewModel = ProfileViewModel(profileRepository)

@@ -7,8 +7,5 @@ import retrofit2.http.GET
 interface ScheduleApiService {
 
     @GET("api/Schedule/my")
-    suspend fun getTeacherSchedule(): Response<List<ScheduleDto>>
-
-    @GET("api/Schedule/children")
-    suspend fun getChildrenSchedule(): Response<List<ScheduleDto>>
+    suspend fun getMySchedule(): Response<List<ScheduleDto>>
 }

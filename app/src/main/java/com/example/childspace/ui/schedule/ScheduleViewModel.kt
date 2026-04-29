@@ -10,8 +10,7 @@ import com.example.childspace.data.repository.ScheduleRepository
 import kotlinx.coroutines.launch
 
 class ScheduleViewModel(
-    private val repository: ScheduleRepository,
-    private val isTeacher: Boolean
+    private val repository: ScheduleRepository
 ) : ViewModel() {
 
     var schedule by mutableStateOf<List<ScheduleDto>>(emptyList())
@@ -23,11 +22,7 @@ class ScheduleViewModel(
             isLoading = true
             errorMessage = null
 
-            val result = if (isTeacher) {
-                repository.getTeacherSchedule()
-            } else {
-                repository.getChildrenSchedule()
-            }
+            val result = repository.getMySchedule()
 
             if (result.isSuccess) {
                 schedule = result.getOrDefault(emptyList())
