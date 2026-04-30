@@ -102,7 +102,7 @@ fun ProfileScreen(viewModel: ProfileViewModel, onLogoutClick: () -> Unit) {
                             ChildCard(
                                 childName = child.name,
                                 age = "${child.age} років",
-                                groupName = child.groupName ?: "Без групи"
+                                groupNames = child.groupNames
                             )
                         }
 
@@ -221,8 +221,9 @@ fun UserCard(firstName: String, lastName: String, email: String, role: String) {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun ChildCard(childName: String, age: String, groupName: String) {
+fun ChildCard(childName: String, age: String, groupNames: List<String>) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -253,11 +254,35 @@ fun ChildCard(childName: String, age: String, groupName: String) {
                     style = MaterialTheme.typography.bodyMedium,
                     color = DarkPurple.copy(alpha = 0.8f)
                 )
-                Text(
-                    text = "👥 $groupName",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = AccentPurple
-                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                if (groupNames.isEmpty()) {
+                    Text(
+                        text = "👥 Без групи",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = AccentPurple
+                    )
+                } else {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        groupNames.forEach { groupName ->
+                            Surface(
+                                color = AccentPurple.copy(alpha = 0.1f),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text(
+                                    text = groupName,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = AccentPurple
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }
