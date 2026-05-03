@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "307923586895",
+    "project_id": "childspace-11ef4",
+    "storage_bucket": "childspace-11ef4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:307923586895:android:6299f9e5086c3dbcc47f3a",
+        "android_client_info": {
+          "package_name": "com.example.childspace"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAPMY3Z45UTPg7epFXFXTm6ob-uqU78c50"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
