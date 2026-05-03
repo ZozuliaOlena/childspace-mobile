@@ -5,8 +5,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,35 +40,43 @@ fun ScheduleScreen(viewModel: ScheduleViewModel) {
                 title = {
                     Text("Розклад", color = DarkPurple, fontWeight = FontWeight.Bold)
                 },
+                actions = {
+                    IconButton(onClick = { viewModel.loadSchedule() }) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Оновити розклад",
+                            tint = DarkPurple
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = LightPurpleBg)
             )
         },
         containerColor = LightPurpleBg
     ) { paddingValues ->
-        Box(
+
+        PullToRefreshBox(
+            isRefreshing = viewModel.isLoading,
+            onRefresh = { viewModel.loadSchedule() },
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            if (viewModel.isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center),
-                    color = AccentPurple
-                )
-            } else if (viewModel.errorMessage != null) {
+
+            if (viewModel.errorMessage != null) {
                 Text(
                     text = viewModel.errorMessage!!,
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.align(Alignment.Center).padding(16.dp)
                 )
-            } else if (viewModel.schedule.isEmpty()) {
+            } else if (viewModel.schedule.isEmpty() && !viewModel.isLoading) {
                 Text(
                     text = "Занять поки немає 😴",
                     color = DarkPurple,
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.align(Alignment.Center)
                 )
-            } else {
+            } else if (viewModel.schedule.isNotEmpty()) {
                 val groupedSchedule = remember(viewModel.schedule) {
                     viewModel.schedule
                         .groupBy { it.startTime.substringBefore("T") }
