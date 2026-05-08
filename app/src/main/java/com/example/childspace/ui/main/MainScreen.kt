@@ -42,9 +42,27 @@ fun MainScreen(
     val navController = rememberNavController()
     val context = LocalContext.current
 
+    val fetchAndSendToken = {
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val token = task.result
+                Log.d("FCM_DEBUG", "Токен успішно отримано: $token")
+                profileViewModel.updateFcmToken(token)
+            } else {
+                Log.e("FCM_DEBUG", "Помилка отримання токена FCM")
+            }
+        }
+    }
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { isGranted ->
+            if (isGranted) {
+                Log.d("FCM_DEBUG", "Користувач надав дозвіл! Тепер отримуємо токен.")
+
+                fetchAndSendToken()
+            } else {
+                Log.e("FCM_DEBUG", "Користувач відмовив у сповіщеннях.")
+            }
         }
     )
 
@@ -55,20 +73,13 @@ fun MainScreen(
                 Manifest.permission.POST_NOTIFICATIONS
             ) == PackageManager.PERMISSION_GRANTED
 
-            if (!isPermissionGranted) {
+            if (isPermissionGranted) {
+                fetchAndSendToken()
+            } else {
                 permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
-        }
-
-        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-            if (!task.isSuccessful) {
-                Log.w("FCM_DEBUG", "Fetching FCM registration token failed", task.exception)
-                return@addOnCompleteListener
-            }
-            val token = task.result
-            Log.d("FCM_DEBUG", "Мій FCM Токен: $token")
-
-             profileViewModel.updateFcmToken(token)
+        } else{
+            fetchAndSendToken()
         }
     }
 
