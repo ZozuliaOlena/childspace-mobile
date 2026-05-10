@@ -29,6 +29,8 @@ import com.example.childspace.ui.profile.ProfileViewModel
 import android.Manifest
 import com.google.firebase.messaging.FirebaseMessaging
 import android.util.Log
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 
 @Composable
 fun MainScreen(
@@ -41,6 +43,9 @@ fun MainScreen(
 ) {
     val navController = rememberNavController()
     val context = LocalContext.current
+
+    val chats by chatsViewModel.chats.collectAsState()
+    val hasUnreadChats = chats.any { it.hasUnreadMessages }
 
     val fetchAndSendToken = {
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
@@ -67,6 +72,7 @@ fun MainScreen(
     )
 
     LaunchedEffect(Unit) {
+        chatsViewModel.loadChats()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val isPermissionGranted = ContextCompat.checkSelfPermission(
                 context,
@@ -85,7 +91,7 @@ fun MainScreen(
 
     Scaffold(
         bottomBar = {
-            BottomNavigationBar(navController = navController)
+            BottomNavigationBar(navController = navController, hasUnreadChats = hasUnreadChats)
         }
     ) { innerPadding ->
 

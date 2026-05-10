@@ -24,7 +24,7 @@ val AccentPurple = Color(0xFF7620D0)
 val LightPurpleBg = Color(0xFFEDE4F5)
 
 @Composable
-fun BottomNavigationBar(navController: NavController) {
+fun BottomNavigationBar(navController: NavController, hasUnreadChats: Boolean){
     val items = listOf(
         BottomNavItem.Schedule,
         BottomNavItem.Chats,
@@ -40,7 +40,19 @@ fun BottomNavigationBar(navController: NavController) {
 
         items.forEach { item ->
             NavigationBarItem(
-                icon = { Icon(imageVector = item.icon, contentDescription = item.title) },
+                icon = {
+                    BadgedBox(
+                        badge = {
+                            if (item == BottomNavItem.Chats && hasUnreadChats) {
+                                Badge(
+                                    containerColor = Color.Red
+                                )
+                            }
+                        }
+                    ) {
+                        Icon(imageVector = item.icon, contentDescription = item.title)
+                    }
+                       },
                 label = { Text(text = item.title) },
                 selected = currentRoute == item.route,
                 onClick = {
