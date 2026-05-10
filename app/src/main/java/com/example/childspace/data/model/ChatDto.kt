@@ -5,5 +5,6 @@ data class ChatDto (
     val name: String?,
     val createdAt: String,
     val participantsCount: Int,
-    val lastMessage: ChatMessageResponseDto?
+    val lastMessage: ChatMessageResponseDto?,
+    val hasUnreadMessages: Boolean = false
 )

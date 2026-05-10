@@ -128,7 +128,10 @@ fun MainScreen(
                     chatName = chatName,
                     participantsCount = count,
                     currentUserId = currentUserId,
-                    onBackClick = { navController.popBackStack() }
+                    onBackClick = {
+                        navController.popBackStack()
+                        chatsViewModel.loadChats()
+                    }
                 )
             }
 

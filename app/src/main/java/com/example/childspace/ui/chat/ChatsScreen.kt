@@ -153,6 +153,16 @@ fun ChatItem(chat: ChatDto, onClick: () -> Unit) {
                     )
                 }
             }
+
+            if (chat.hasUnreadMessages){
+                Spacer(modifier = Modifier.width(8.dp))
+                Box(
+                    modifier = Modifier
+                        .size(12.dp)
+                        .clip(CircleShape)
+                        .background(AccentPurple)
+                )
+            }
         }
     }
 }

@@ -52,4 +52,17 @@ class ChatRepository(private val apiService: ChatApiService,
     fun disconnectFromLiveChat() {
         signalRManager.disconnect()
     }
+
+    suspend fun markChatAsRead(chatId: String): Result<Unit> {
+        return try{
+            val response = apiService.markChatAsRead(chatId)
+            if(response.isSuccessful){
+                Result.success(Unit)
+            } else{
+                Result.failure(Exception("Помилка: ${response.code()}"))
+            }
+        } catch (e: Exception){
+            Result.failure(e)
+        }
+    }
 }

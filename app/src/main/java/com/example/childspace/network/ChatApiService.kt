@@ -45,4 +45,7 @@ interface ChatApiService {
     suspend fun getChatParticipants(
         @Path("id") chatId: String
     ): Response<List<UserDto>>
+
+    @POST("api/chat/{chatId}/mark-read")
+    suspend fun markChatAsRead(@Path("chatId") chatId: String): Response<Unit>
 }

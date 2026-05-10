@@ -3,7 +3,6 @@ package com.example.childspace.ui.chat
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.childspace.data.model.ChatMessageResponseDto
 import com.example.childspace.data.model.UserDto
 import com.example.childspace.data.repository.ChatRepository
@@ -45,6 +44,13 @@ class ChatDetailsViewModel (private val repository: ChatRepository) : ViewModel(
         viewModelScope.launch {
             kotlinx.coroutines.delay(500)
             repository.joinChatGroup(chatId)
+            val result = repository.markChatAsRead(chatId)
+            if (result.isFailure) {
+                val exception = result.exceptionOrNull()
+                Log.e("ChatDetailVM", "Не вдалося позначити як прочитане: ${exception?.message}")
+            } else {
+                Log.d("ChatDetailVM", "Чат успішно позначено як прочитаний")
+            }
         }
         loadMessages()
     }
