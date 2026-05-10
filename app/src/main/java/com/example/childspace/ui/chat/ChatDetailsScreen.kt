@@ -36,7 +36,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.*
@@ -52,7 +51,9 @@ import com.example.childspace.ui.theme.DarkPurple
 import java.text.SimpleDateFormat
 import java.util.Locale
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.ui.draw.clip
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,10 +68,28 @@ fun ChatDetailsScreen (
 ) {
     val messages by viewModel.messages.collectAsState()
     val editingMessage by viewModel.editingMessage.collectAsState()
+    val isLoadingMore by viewModel.isLoadingMore.collectAsState()
     var messageText by remember { mutableStateOf("") }
 
     var showParticipantsDialog by remember { mutableStateOf(false) }
     val participantsList by viewModel.participants.collectAsState()
+
+    val listState = rememberLazyListState()
+
+    val shouldLoadMore = remember {
+        derivedStateOf {
+            val totalItems = listState.layoutInfo.totalItemsCount
+            val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+
+            totalItems > 0 && lastVisibleItem >= totalItems - 5
+        }
+    }
+
+    LaunchedEffect(shouldLoadMore.value) {
+        if (shouldLoadMore.value) {
+            viewModel.loadMoreMessages()
+        }
+    }
 
     LaunchedEffect(chatId) {
         viewModel.openChat(chatId)
@@ -107,6 +126,7 @@ fun ChatDetailsScreen (
             modifier = Modifier.fillMaxSize().padding(paddingValues)
         ){
             LazyColumn(
+                state = listState,
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 16.dp),
@@ -132,6 +152,23 @@ fun ChatDetailsScreen (
 
                     if (showDate) {
                         DateHeader(dateText = formatDateForHeader(message.createdAt))
+                    }
+                }
+
+                if (isLoadingMore) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = AccentPurple,
+                                strokeWidth = 2.dp
+                            )
+                        }
                     }
                 }
             }

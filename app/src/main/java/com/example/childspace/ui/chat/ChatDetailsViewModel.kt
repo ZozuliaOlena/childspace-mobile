@@ -20,11 +20,18 @@ class ChatDetailsViewModel (private val repository: ChatRepository) : ViewModel(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
+    private val _isLoadingMore = MutableStateFlow(false)
+    val isLoadingMore: StateFlow<Boolean> = _isLoadingMore.asStateFlow()
+
     private val _participants = MutableStateFlow<List<UserDto>>(emptyList())
     val participants: StateFlow<List<UserDto>> = _participants.asStateFlow()
 
     private val _editingMessage = MutableStateFlow<ChatMessageResponseDto?>(null)
     val editingMessage: StateFlow<ChatMessageResponseDto?> = _editingMessage.asStateFlow()
+
+    private var currentPage = 1
+    private val pageSize = 50
+    private var isLastPage = false
 
     init {
         viewModelScope.launch {
@@ -39,6 +46,8 @@ class ChatDetailsViewModel (private val repository: ChatRepository) : ViewModel(
 
     fun openChat(chatId: String) {
         activeChatId = chatId
+        currentPage = 1
+        isLastPage = false
         _messages.value = emptyList()
         repository.connectToLiveChat()
         viewModelScope.launch {
@@ -60,16 +69,51 @@ class ChatDetailsViewModel (private val repository: ChatRepository) : ViewModel(
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                // Пагінацію додати
-                val response = repository.getChatMessages(activeChatId!!, 1, 50)
+                val response = repository.getChatMessages(activeChatId!!, currentPage, pageSize)
                 if (response.isSuccessful) {
                     val list = response.body() ?: emptyList()
                     _messages.value = list.sortedByDescending { it.createdAt }
+
+                    isLastPage = list.size < pageSize
                 }
             } catch (e: Exception) {
                 Log.e("ChatDetailVM", "Помилка: ${e.message}")
             } finally {
                 _isLoading.value = false
+            }
+        }
+    }
+
+    fun loadMoreMessages() {
+        if (activeChatId == null || _isLoadingMore.value || isLastPage){
+            return
+        }
+
+        viewModelScope.launch {
+            _isLoadingMore.value = true
+            currentPage++
+
+            try {
+                val response = repository.getChatMessages(activeChatId!!, currentPage, pageSize)
+                if (response.isSuccessful) {
+                    val newMessages = response.body() ?: emptyList()
+
+                    if (newMessages.isNotEmpty()) {
+                        val sortedNewMessages = newMessages.sortedByDescending { it.createdAt }
+                        val currentList = _messages.value
+
+                        _messages.value = (currentList + sortedNewMessages).distinctBy { it.id }
+                    }
+
+                    if (newMessages.size < pageSize) {
+                        isLastPage = true
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("ChatDetailVM", "Помилка пагінації: ${e.message}")
+                currentPage--
+            } finally {
+                _isLoadingMore.value = false
             }
         }
     }
