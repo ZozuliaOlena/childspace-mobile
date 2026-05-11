@@ -24,7 +24,7 @@ class ChatsViewModel(private val repository: ChatRepository): ViewModel(){
                 val response = repository.getAllChats()
                 if (response.isSuccessful){
                     val chatList = response.body() ?: emptyList()
-                    _chats.value = chatList.sortedByDescending { it.createdAt }
+                    _chats.value = chatList
                 } else{
                     Log.e("ChatsVM", "Помилка завантаження чатів: ${response.code()}")
                 }
