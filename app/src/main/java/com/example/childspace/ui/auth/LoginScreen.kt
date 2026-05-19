@@ -1,7 +1,11 @@
 package com.example.childspace.ui.auth
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
@@ -10,18 +14,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 
-// Твоя фирменная палитра
 val DarkPurple = Color(0xFF4F169E)
 val AccentPurple = Color(0xFF7620D0)
 val LightPurpleBg = Color(0xFFEDE4F5)
 
 @Composable
 fun LoginScreen(viewModel: AuthViewModel, onNavigateToMain: () -> Unit) {
-    // Surface задает цвет фона на весь экран
+    val focusManager = LocalFocusManager.current
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = LightPurpleBg
@@ -29,7 +36,9 @@ fun LoginScreen(viewModel: AuthViewModel, onNavigateToMain: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
+                .padding(24.dp)
+                .imePadding()
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -49,7 +58,6 @@ fun LoginScreen(viewModel: AuthViewModel, onNavigateToMain: () -> Unit) {
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Настройка цветов для полей ввода (белый фон, фиолетовые рамки)
             val textFieldColors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = Color.White,
                 unfocusedContainerColor = Color.White,
@@ -67,9 +75,13 @@ fun LoginScreen(viewModel: AuthViewModel, onNavigateToMain: () -> Unit) {
                 onValueChange = { viewModel.email = it },
                 label = { Text("Електронна пошта") },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp), // Сильное скругление как на макете
+                shape = RoundedCornerShape(24.dp),
                 colors = textFieldColors,
-                leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) }
+                leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Next
+                )
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -82,7 +94,17 @@ fun LoginScreen(viewModel: AuthViewModel, onNavigateToMain: () -> Unit) {
                 shape = RoundedCornerShape(24.dp),
                 colors = textFieldColors,
                 visualTransformation = PasswordVisualTransformation(),
-                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) }
+                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        focusManager.clearFocus()
+                        viewModel.onLoginClick(onNavigateToMain)
+                    }
+                )
             )
 
             viewModel.errorMessage?.let {
@@ -96,7 +118,10 @@ fun LoginScreen(viewModel: AuthViewModel, onNavigateToMain: () -> Unit) {
             Spacer(modifier = Modifier.height(32.dp))
 
             Button(
-                onClick = { viewModel.onLoginClick(onNavigateToMain) },
+                onClick = {
+                    focusManager.clearFocus()
+                    viewModel.onLoginClick(onNavigateToMain)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
