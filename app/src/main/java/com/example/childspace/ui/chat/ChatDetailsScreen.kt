@@ -54,6 +54,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.draw.clip
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,7 +70,7 @@ fun ChatDetailsScreen (
     val messages by viewModel.messages.collectAsState()
     val editingMessage by viewModel.editingMessage.collectAsState()
     val isLoadingMore by viewModel.isLoadingMore.collectAsState()
-    var messageText by remember { mutableStateOf("") }
+    var messageText by rememberSaveable { mutableStateOf("") }
 
     var showParticipantsDialog by remember { mutableStateOf(false) }
     val participantsList by viewModel.participants.collectAsState()
@@ -373,7 +374,7 @@ fun MessageInputArea(
             ) {
                 Text("Редагування повідомлення...", color = AccentPurple, fontSize = 12.sp)
                 TextButton(onClick = onCancelEdit) {
-                    Text("Скасувати", color = Color.Gray, fontSize = 12.sp)
+                    Text("Скасувати", color = Color.Black, fontSize = 12.sp)
                 }
             }
         }
