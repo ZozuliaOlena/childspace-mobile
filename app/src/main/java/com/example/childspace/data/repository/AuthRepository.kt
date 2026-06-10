@@ -14,16 +14,18 @@ class AuthRepository(
             if (response.isSuccessful && response.body() != null) {
                 val body = response.body()!!
 
-                // C# возвращает массив ролей. Берем первую роль.
-                // Если массив пустой (чего быть не должно), ставим дефолт "Parent"
                 val primaryRole = body.roles.firstOrNull() ?: "Parent"
 
-                // Сохраняем токен и роль!
                 tokenManager.saveAuthData(body.token, primaryRole, body.id)
 
                 Result.success(Unit)
             } else {
-                Result.failure(Exception("Помилка входу: ${response.code()}"))
+                val errorMessage = when (response.code()) {
+                    401 -> "Невірний email або пароль"
+                    400 -> "Перевірте правильність введених даних"
+                    else -> "Помилка входу: ${response.code()}"
+                }
+                Result.failure(Exception(errorMessage))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -31,7 +33,6 @@ class AuthRepository(
     }
 
     fun logout() {
-        // Очищаем память при выходе
         tokenManager.clearAuthData()
     }
 }
