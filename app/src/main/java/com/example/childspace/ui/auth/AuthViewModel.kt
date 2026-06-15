@@ -24,6 +24,9 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
 
             isLoading = false
             if (result.isSuccess) {
+                email = ""
+                password = ""
+
                 onSuccess()
             } else {
                 errorMessage = result.exceptionOrNull()?.message
